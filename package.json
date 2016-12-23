@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "dev": "phantomjs app.js dev",
+    "beta": "phantomjs app.js beta",
+    "sta": "phantomjs app.js sta",
+    "prod": "phantomjs app.js prod"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "dependencies": "2.1.1"
+  }
+}
