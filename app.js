@@ -71,6 +71,7 @@ function handle_page(data) {
     //report collect    
     collect.page = data.name;
     collect.url = pageUrl;
+    collect.result = 'failure';
 
     console.log('\r');
     console.log(data.name + ' ' + pageUrl + ' ... done');
@@ -90,7 +91,6 @@ function handle_page(data) {
             console.log('Fail to load the ' + pageUrl);
 
             collect.load = '';
-            collect.result = 'failure';
             report.collect(collect);
         }
 
