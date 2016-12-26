@@ -8,6 +8,6 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "dependencies": "2.1.1"
+    "phantomjs": "2.1.1"
   }
 }
