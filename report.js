@@ -29,7 +29,7 @@ report.prototype.collect = function(obj) {
     this.contents += '<table>';
     this.contents += '<tr><td class="label">Page</td><td>' + obj.page + '</td></tr>';
     this.contents += '<tr><td class="label">Url</td><td>' + obj.url + '</td></tr>';
-    this.contents += '<tr><td class="label">Load</td><td>' + ((obj.loading !== '') ? obj.loading : '') + 'ms</td></tr>';
+    this.contents += '<tr><td class="label">Load</td><td>' + ((obj.load !== '') ? obj.load : '') + 'ms</td></tr>';
     this.contents += '<tr><td class="label">Req</td><td>' + obj.request + '</td></tr>';
     this.contents += '<tr><td class="label res">Res</td><td>' + obj.result + '</td></tr>';
     this.contents += '</table>';
@@ -37,7 +37,9 @@ report.prototype.collect = function(obj) {
 };
 
 report.prototype.create = function() {
-    fs.write('./report/index.html', this.container + '<h3>' + this.gaid + '</h3>' + this.contents + this.containerEnd, 'w');
+    var d = new Date();
+    var n = d.toLocaleString();
+    fs.write('./report/index.html', this.container + '<h4>GaId : ' + this.gaid + '<br>Updated by ' + n + '</h4>' + this.contents + this.containerEnd, 'w');
     console.log('\r\nreport to a file [./report/index.html]');
 };
 

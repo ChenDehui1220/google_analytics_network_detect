@@ -12,7 +12,7 @@ var config = {
 		gaId: 'UA-54005280-3',
 		webSiteUrl: {
             desktop: 'http://gary_chen.mall.mall.dev.hq.hiiir/',
-            mobile: ''
+            mobile: 'http://gary_chen.mobile.mall.dev.hq.hiiir/'
         }
 	},
     beta: {
@@ -26,14 +26,14 @@ var config = {
     	gaId: 'UA-54005280-1',
     	webSiteUrl: {
             desktop: 'http://mall.sta.hiiir-inc.com/',
-            mobile: ''
+            mobile: 'http://mall-m.sta.hiiir-inc.com/'
         }
     },
     prod: {
     	gaId: 'UA-54005280-1',
     	webSiteUrl: {
             desktop: 'http://shopping.friday.tw/',
-            mobile: ''
+            mobile: 'http://m.shopping.friday.tw/'
         }
     },
     globals: {

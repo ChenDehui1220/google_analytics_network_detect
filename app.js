@@ -7,7 +7,7 @@ var page = require('webpage').create(),
     scripts = require('./scripts'),
     reports = require('./report'),
     system = require('system'),
-    collect = { page: '', url: '', loading: '', request: '', result: '' },
+    collect = { page: '', url: '', load: '', request: '', result: '' },
     t, env, gaId, report;
 
 //get environment arguments. ex: beta, production
@@ -27,13 +27,12 @@ if (typeof env !== 'string' && ['beta', 'production'].indexOf(env) === -1) {
 
 // === event listener ===
 page.onResourceRequested = function(req) {
-    if (/(www.google-analytics\.com\/collect)/i.test(req.url)) {
+    if (/(www\.google-analytics\.com\/collect)/i.test(req.url)) {
         if (/(t=pageview)/i.test(req.url)) {
             collect.request += req.url + '<br>';
             collect.result = 'pageview already sent';
         } else {
-            collect.request = req.url;
-            collect.result = 'failure';
+            collect.request += req.url;
         }
     }
 };
@@ -76,6 +75,7 @@ function handle_page(data) {
     console.log('\r');
     console.log(data.name + ' ' + pageUrl + ' ... done');
 
+    page.settings.resourceTimeout = 8000;
     page.viewportSize = {
         width: 1366,
         height: 694
@@ -84,19 +84,17 @@ function handle_page(data) {
 
         if (status === "success") {
 
-            collect.loading = Date.now() - t;
+            collect.load = Date.now() - t;
             report.collect(collect);
         } else {
             console.log('Fail to load the ' + pageUrl);
 
-            collect.loading = '';
+            collect.load = '';
             collect.result = 'failure';
             report.collect(collect);
         }
 
-
-
-        setTimeout(next_page, 250);
+        setTimeout(next_page, 500);
     });
 }
 
@@ -110,7 +108,7 @@ function next_page() {
 
     //reset some variables
     t = Date.now();
-    collect = { page: '', url: '', loading: '', request: '', result: '' };
+    collect = { page: '', url: '', load: '', request: '', result: '' };
 
     //handle page
     handle_page(data);
