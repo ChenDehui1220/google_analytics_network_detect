@@ -7,9 +7,8 @@ var page = require('webpage').create(),
     scripts = require('./scripts'),
     reports = require('./report'),
     system = require('system'),
-    // t = Date.now(),
-    collect = {page:'', url:'', request:'', result: ''},
-    env, gaId, report;
+    collect = { page: '', url: '', loading: '', request: '', result: '' },
+    t, env, gaId, report;
 
 //get environment arguments. ex: beta, production
 env = system.args[1];
@@ -27,11 +26,10 @@ if (typeof env !== 'string' && ['beta', 'production'].indexOf(env) === -1) {
 }
 
 // === event listener ===
-
-var reqParse = function(req) {
-    if (/(http:\/\/www.google-analytics\.com\/collect)/i.test(req.url)) {
+page.onResourceRequested = function(req) {
+    if (/(www.google-analytics\.com\/collect)/i.test(req.url)) {
         if (/(t=pageview)/i.test(req.url)) {
-            collect.request = req.url;
+            collect.request += req.url + '<br>';
             collect.result = 'pageview already sent';
         } else {
             collect.request = req.url;
@@ -40,24 +38,7 @@ var reqParse = function(req) {
     }
 };
 
-var resParse = function(res) {
-    if (/(www\.google-analytics\.com\/collect)/i.test(res.url)) {
-        // console.log('received: ' + JSON.stringify(res, undefined, 4));
-        // console.log(res.url);
-    }
-};
-
-page.onResourceRequested = function(req) {
-    reqParse(req);
-};
-
-page.onResourceReceived = function(res) {
-    resParse(res);
-};
-
-page.onConsoleMessage = function(msg) {
-  // console.log('Page title is ' + msg);
-};
+page.onResourceReceived = function(res) {};
 
 page.onError = function(msg, trace) {
 
@@ -77,25 +58,45 @@ page.onError = function(msg, trace) {
 
 function handle_page(data) {
 
-	console.log('\r');
-    console.log(data.name + ' ' + config[env].webSiteUrl + data.url + ' ... done');
+    //set api
+    var pageUrl = '';
 
+    if (data.isMobile === true) {
+        pageUrl = config[env].webSiteUrl.mobile + data.url;
+        page.settings.userAgent = config.globals.userAgent.mobile;
+    } else {
+        pageUrl = config[env].webSiteUrl.desktop + data.url;
+        page.settings.userAgent = config.globals.userAgent.desktop;
+    }
+
+    //report collect    
     collect.page = data.name;
-    collect.url = config[env].webSiteUrl + data.url;
+    collect.url = pageUrl;
 
-    page.open(config[env].webSiteUrl + data.url, function(status) {
+    console.log('\r');
+    console.log(data.name + ' ' + pageUrl + ' ... done');
+
+    page.viewportSize = {
+        width: 1366,
+        height: 694
+    };
+    page.open(pageUrl, function(status) {
+
         if (status === "success") {
 
-            // t = Date.now() - t;
-            // console.log('Loading time ' + t + ' ms');
-            // console.log(config[env].gaId);
-
+            collect.loading = Date.now() - t;
             report.collect(collect);
         } else {
-            console.log('Fail to load the ' + config[env].webSiteUrl);
+            console.log('Fail to load the ' + pageUrl);
+
+            collect.loading = '';
+            collect.result = 'failure';
+            report.collect(collect);
         }
 
-        setTimeout(next_page, 100);
+
+
+        setTimeout(next_page, 250);
     });
 }
 
@@ -103,9 +104,15 @@ function next_page() {
     var data = scripts.pageview.page.shift();
 
     if (typeof data !== 'object') {
-    	report.create();
+        report.create();
         phantom.exit(0);
     }
+
+    //reset some variables
+    t = Date.now();
+    collect = { page: '', url: '', loading: '', request: '', result: '' };
+
+    //handle page
     handle_page(data);
 }
 

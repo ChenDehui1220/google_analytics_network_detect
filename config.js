@@ -10,19 +10,37 @@
 var config = {
 	dev: {
 		gaId: 'UA-54005280-3',
-		webSiteUrl: 'http://gary_chen.mall.mall.dev.hq.hiiir/'
+		webSiteUrl: {
+            desktop: 'http://gary_chen.mall.mall.dev.hq.hiiir/',
+            mobile: ''
+        }
 	},
     beta: {
     	gaId: 'UA-54005280-3',
-    	webSiteUrl: 'http://mall.beta.hiiir-inc.com/'
+    	webSiteUrl: {
+            desktop: 'http://mall.beta.hiiir-inc.com/',
+            mobile: 'http://mall-m.beta.hiiir-inc.com/'
+        }
     },
     sta: {
     	gaId: 'UA-54005280-1',
-    	webSiteUrl: 'http://mall.sta.hiiir-inc.com/'
+    	webSiteUrl: {
+            desktop: 'http://mall.sta.hiiir-inc.com/',
+            mobile: ''
+        }
     },
     prod: {
     	gaId: 'UA-54005280-1',
-    	webSiteUrl: 'http://shopping.friday.tw/'
+    	webSiteUrl: {
+            desktop: 'http://shopping.friday.tw/',
+            mobile: ''
+        }
+    },
+    globals: {
+        userAgent: {
+            desktop: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36',
+            mobile: 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1'
+        }
     }
 
 };
