@@ -10,13 +10,14 @@ var fs = require('fs');
 
 var report = function() {
     this.gaid = '';
-    this.container = '<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8">';
-    this.container += '<title>Google Analytics Network Test Results</title>';
+    this.title = 'Google Analytics Network Test Results';
+    this.container = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">';
+    this.container += '<title>' + this.title + '</title>';
     this.container += '<style>body{font-size:13px;font-family:Arial;}section{padding:5px;border:1px solid #999;}td{word-break: break-all}';
     this.container += '.label{width:80px;padding:5px;text-align:center;background-color: #DAA2DA;}a:link,a:visited{color:black;text-decoration:none;}';
     this.container += '.good{background-color:#bed905}.bad{background-color:red;}';
     this.container += 'ul{padding:0;margin:0}li{list-style:none;padding:5px 0;}</style>';
-    this.container += '</head><body><h1>Google Analytics Network Test Results</h1>';
+    this.container += '</head><body><h1>' + this.title + '</h1>';
     this.contents = '';
     this.containerEnd = '</body></html>';
 };
