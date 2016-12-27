@@ -40,7 +40,7 @@ report.prototype.collect = function(obj) {
 
     for (var i in obj.request) {
         gaDebugUrl = obj.request[i].replace('www.google-analytics.com/collect', 'www.google-analytics.com/debug/collect');
-        this.contents += '<li><a href="' + gaDebugUrl + '" target="_blank">' + obj.request[i] + '</a></li>';
+        this.contents += '<li>' + obj.request[i] + '</li>';
     }
 
     this.contents += '</ul></td></tr>';
