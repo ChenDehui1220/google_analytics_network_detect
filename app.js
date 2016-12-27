@@ -7,8 +7,7 @@ var page = require('webpage').create(),
     scripts = require('./scripts'),
     reports = require('./report'),
     system = require('system'),
-    collect = { page: '', url: '', load: '', request: '', result: '' },
-    t, env, gaId, report;
+    collect, t, env, gaId, report;
 
 //get environment arguments. ex: beta, production
 env = system.args[1];
@@ -28,6 +27,9 @@ if (typeof env !== 'string' && ['beta', 'production'].indexOf(env) === -1) {
 // === event listener ===
 page.onResourceRequested = function(req) {
     if (/(www\.google-analytics\.com\/collect)/i.test(req.url)) {
+
+    	collect.pass = true;
+
         if (/(t=pageview)/i.test(req.url)) {
             collect.request += req.url + '<br>';
             collect.result = 'pageview already sent';
@@ -94,7 +96,7 @@ function handle_page(data) {
             report.collect(collect);
         }
 
-        setTimeout(next_page, 500);
+        setTimeout(next_page, 100);
     });
 }
 
@@ -108,7 +110,7 @@ function next_page() {
 
     //reset some variables
     t = Date.now();
-    collect = { page: '', url: '', load: '', request: '', result: '' };
+    collect = { page: '', url: '', load: '', request: '', result: '', pass: false };
 
     //handle page
     handle_page(data);
