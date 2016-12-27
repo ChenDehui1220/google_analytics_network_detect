@@ -25,21 +25,33 @@ if (typeof env !== 'string' && ['beta', 'production'].indexOf(env) === -1) {
 }
 
 // === event listener ===
-page.onResourceRequested = function(req) {
+page.onResourceRequested = function(req, net) {
     if (/(www\.google-analytics\.com\/collect)/i.test(req.url)) {
-
-    	collect.pass = true;
+        collect.pass = true;
+        collect.request.push(req.url);
 
         if (/(t=pageview)/i.test(req.url)) {
-            collect.request += req.url + '<br>';
             collect.result = 'pageview already sent';
-        } else {
-            collect.request += req.url;
         }
+    }
+
+    if (/(affiliate|pmd)/i.test(req.url)) {
+    	net.abort();
     }
 };
 
-page.onResourceReceived = function(res) {};
+page.onConsoleMessage = function(msg, lineNum, sourceId) {
+  // console.log('CONSOLE: ' + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")');
+};
+
+page.onResourceError = function(resourceError) {
+  // console.log('Unable to load resource (#' + resourceError.id + 'URL:' + resourceError.url + ')');
+  // console.log('Error code: ' + resourceError.errorCode + '. Description: ' + resourceError.errorString);
+};
+
+page.onResourceReceived = function(res) {
+	// console.log('Response (#' + res.id + ', stage "' + res.stage + '"): ' + JSON.stringify(res));
+};
 
 page.onError = function(msg, trace) {
 
@@ -65,9 +77,11 @@ function handle_page(data) {
     if (data.isMobile === true) {
         pageUrl = config[env].webSiteUrl.mobile + data.url;
         page.settings.userAgent = config.globals.userAgent.mobile;
+        page.viewportSize = config.globals.viewportSize.mobile;
     } else {
         pageUrl = config[env].webSiteUrl.desktop + data.url;
         page.settings.userAgent = config.globals.userAgent.desktop;
+        page.viewportSize = config.globals.viewportSize.desktop;
     }
 
     //report collect    
@@ -79,23 +93,16 @@ function handle_page(data) {
     console.log(data.name + ' ' + pageUrl + ' ... done');
 
     page.settings.resourceTimeout = 8000;
-    page.viewportSize = {
-        width: 1366,
-        height: 694
-    };
+    
     page.open(pageUrl, function(status) {
-
         if (status === "success") {
-
             collect.load = Date.now() - t;
             report.collect(collect);
         } else {
             console.log('Fail to load the ' + pageUrl);
-
-            collect.load = '';
             report.collect(collect);
         }
-
+        
         setTimeout(next_page, 100);
     });
 }
@@ -110,7 +117,7 @@ function next_page() {
 
     //reset some variables
     t = Date.now();
-    collect = { page: '', url: '', load: '', request: '', result: '', pass: false };
+    collect = { page: '', url: '', load: '', request: [], result: '', pass: false };
 
     //handle page
     handle_page(data);
