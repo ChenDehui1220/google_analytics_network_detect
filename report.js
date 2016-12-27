@@ -33,13 +33,13 @@ report.prototype.collect = function(obj) {
     this.contents += '<section>';
     this.contents += '<table>';
     this.contents += '<tr><td class="label">Page</td><td>' + obj.page + '</td></tr>';
-    this.contents += '<tr><td class="label">Url</td><td>' + decodeURI(obj.url) + '</td></tr>';
+    this.contents += '<tr><td class="label">Url</td><td>' + obj.url + '</td></tr>';
     this.contents += '<tr><td class="label">Load</td><td>' + ((obj.load !== '') ? obj.load : '') + 'ms</td></tr>';
     this.contents += '<tr><td class="label">Req</td><td><ul>';
 
     for (var i in obj.request) {
         gaDebugUrl = obj.request[i].replace('www.google-analytics.com/collect', 'www.google-analytics.com/debug/collect');
-        this.contents += '<li><a href="' + gaDebugUrl + '" target="_blank">' + decodeURI(obj.request[i]) + '</a></li>';
+        this.contents += '<li><a href="' + gaDebugUrl + '" target="_blank">' + obj.request[i] + '</a></li>';
     }
 
     this.contents += '</ul></td></tr>';
