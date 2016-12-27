@@ -103,7 +103,7 @@ function handle_page(data) {
             report.collect(collect);
         }
         
-        setTimeout(next_page, 100);
+        setTimeout(next_page, 500);
     });
 }
 
