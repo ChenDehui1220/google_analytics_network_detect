@@ -7,16 +7,17 @@
 'use strict';
 
 var fs = require('fs');
+var config = require('./config');
 
 var report = function() {
     this.gaid = '';
-    this.title = 'Google Analytics Network Test Results';
+    this.title = config.globals.report.title;
+
     this.container = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">';
     this.container += '<title>' + this.title + '</title>';
-    this.container += '<style>body{font-size:13px;font-family:Arial;}section{padding:5px;border:1px solid #999;}td{word-break: break-all}';
-    this.container += '.label{width:80px;padding:5px;text-align:center;background-color: #DAA2DA;}a:link,a:visited{color:black;text-decoration:none;}';
-    this.container += '.good{background-color:#bed905}.bad{background-color:red;}';
-    this.container += '</style>';
+    this.container += '<link rel="stylesheet" type="text/css" href="style.css">';
+    this.container += '<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>';
+    this.container += '<script src="app.js"></script>';
     this.container += '</head><body><h1>' + this.title + '</h1>';
     this.contents = '';
     this.containerEnd = '</body></html>';
@@ -36,14 +37,14 @@ report.prototype.collect = function(obj) {
     this.contents += '<tr><td class="label">Page</td><td>' + obj.page + '</td></tr>';
     this.contents += '<tr><td class="label">Url</td><td>' + obj.url + '</td></tr>';
     this.contents += '<tr><td class="label">Load</td><td>' + ((obj.load !== '') ? obj.load : '') + 'ms</td></tr>';
-    this.contents += '<tr><td class="label">Req</td><td>';
+    this.contents += '<tr><td class="label">Req</td><td><ul>';
 
     for (var i in obj.request) {
         gaDebugUrl = obj.request[i].replace('www.google-analytics.com/collect', 'www.google-analytics.com/debug/collect');
-        this.contents += '' + obj.request[i] + '';
+        this.contents += '<li><a href="' + gaDebugUrl + '" target="_blank">' + obj.request[i] + '</a></li>';
     }
 
-    this.contents += '</td></tr>';
+    this.contents += '</ul></td></tr>';
     this.contents += '<tr><td class="label ' + fstyle + '">Res</td><td>' + obj.result + '</td></tr>';
     this.contents += '</table>';
     this.contents += '</section>';
@@ -53,6 +54,16 @@ report.prototype.create = function() {
     var d = new Date();
     var n = d.toLocaleString();
     fs.write('./report/index.html', this.container + '<h4>Tracking ID : ' + this.gaid + '<br>Updated by ' + n + '</h4>' + this.contents + this.containerEnd, 'w');
+    if (fs.isFile('report/style.css')) { 
+        fs.remove('report/style.css'); 
+    }
+    fs.copy('report_resource/style.css', 'report/style.css');
+    
+    if (fs.isFile('report/app.js')) { 
+        fs.remove('report/app.js'); 
+    }
+    fs.copy('report_resource/app.js', 'report/app.js');
+
     console.log('\r\nreport to a file [./report/index.html]');
 };
 

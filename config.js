@@ -18,7 +18,7 @@ var config = {
     beta: {
     	gaId: 'UA-54005280-3',
     	webSiteUrl: {
-            desktop: 'https://mall.beta.hiiir-inc.com/',
+            desktop: 'http://mall.beta.hiiir-inc.com/',
             mobile: 'http://mall-m.beta.hiiir-inc.com/'
         }
     },
@@ -44,6 +44,9 @@ var config = {
         viewportSize: {
             desktop: {width: 1366, height: 694},
             mobile: {width: 320, height: 568}
+        },
+        report: {
+            title: 'Google Analytics Network Test Results'
         }
     }
 

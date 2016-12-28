@@ -36,21 +36,22 @@ page.onResourceRequested = function(req, net) {
     }
 
     if (/(affiliate|pmd)/i.test(req.url)) {
-    	net.abort();
+        net.abort();
     }
 };
 
 page.onConsoleMessage = function(msg, lineNum, sourceId) {
-  // console.log('CONSOLE: ' + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")');
+    // console.log('CONSOLE: ' + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")');
 };
 
-page.onResourceError = function(resourceError) {
-  // console.log('Unable to load resource (#' + resourceError.id + 'URL:' + resourceError.url + ')');
-  // console.log('Error code: ' + resourceError.errorCode + '. Description: ' + resourceError.errorString);
+page.onResourceError = function(err) {
+    // system.stderr.writeLine('= onResourceError()');
+    // system.stderr.writeLine('  - unable to load url: "' + err.url + '"');
+    // system.stderr.writeLine('  - error code: ' + err.errorCode + ', description: ' + err.errorString );
 };
 
 page.onResourceReceived = function(res) {
-	// console.log('Response (#' + res.id + ', stage "' + res.stage + '"): ' + JSON.stringify(res));
+    // console.log('Response (#' + res.id + ', stage "' + res.stage + '"): ' + JSON.stringify(res));
 };
 
 page.onError = function(msg, trace) {
@@ -67,6 +68,19 @@ page.onError = function(msg, trace) {
     // console.error(msgStack.join('\n'));
 };
 
+page.onLoadStarted = function() {
+    system.stderr.writeLine('= onLoadStarted()');
+    var currentUrl = page.evaluate(function() {
+        return window.location.href;
+    });
+    system.stderr.writeLine('  leaving url: ' + currentUrl);
+};
+
+page.onLoadFinished = function(status) {
+    system.stderr.writeLine('= onLoadFinished()');
+    system.stderr.writeLine('  status: ' + status);
+};
+
 // === event listener end ===
 
 function handle_page(data) {
@@ -74,6 +88,7 @@ function handle_page(data) {
     //set api
     var pageUrl = '';
 
+    //set desktop or mobile
     if (data.isMobile === true) {
         pageUrl = config[env].webSiteUrl.mobile + data.url;
         page.settings.userAgent = config.globals.userAgent.mobile;
@@ -84,16 +99,15 @@ function handle_page(data) {
         page.viewportSize = config.globals.viewportSize.desktop;
     }
 
-    //report collect    
+    //report object    
     collect.page = data.name;
     collect.url = pageUrl;
     collect.result = 'failure';
 
     console.log('\r');
-    console.log(data.name + ' ' + pageUrl + ' ... done');
+    console.log(data.name + ' ' + pageUrl);
 
-    page.settings.resourceTimeout = 8000;
-    
+    //explore website
     page.open(pageUrl, function(status) {
         if (status === "success") {
             collect.load = Date.now() - t;
@@ -102,8 +116,11 @@ function handle_page(data) {
             console.log('Fail to load the ' + pageUrl);
             report.collect(collect);
         }
-        
-        setTimeout(next_page, 500);
+
+        page.stop();
+
+        //important!!  must wait a tiny time.
+        setTimeout(next_page, 100);
     });
 }
 
@@ -111,8 +128,8 @@ function next_page() {
     var data = scripts.pageview.page.shift();
 
     if (typeof data !== 'object') {
-        report.create();
         phantom.exit(0);
+        report.create();
     }
 
     //reset some variables
