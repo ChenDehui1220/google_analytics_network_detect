@@ -1,4 +1,4 @@
-/* globals phantom */
+/* globals phantom, window */
 
 'use strict';
 
@@ -8,6 +8,9 @@ var page = require('webpage').create(),
     reports = require('./report'),
     system = require('system'),
     collect, t, env, gaId, report;
+
+var everyAryTime = 3000;
+var scriptPageAry = scripts.pageview.page;
 
 //get environment arguments. ex: beta, production
 env = system.args[1];
@@ -26,46 +29,25 @@ if (typeof env !== 'string' && ['beta', 'production'].indexOf(env) === -1) {
 
 // === event listener ===
 page.onResourceRequested = function(req, net) {
-    if (/(www\.google-analytics\.com\/collect)/i.test(req.url)) {
-        collect.pass = true;
-        collect.request.push(req.url);
-
-        if (/(t=pageview)/i.test(req.url)) {
-            collect.result = 'pageview already sent';
-        }
-    }
-
     if (/(affiliate|pmd)/i.test(req.url)) {
         net.abort();
     }
 };
 
-page.onConsoleMessage = function(msg, lineNum, sourceId) {
-    // console.log('CONSOLE: ' + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")');
-};
+page.onResourceReceived = function(req) {
+    if (/(www\.google-analytics\.com\/collect)/i.test(req.url)) {
+        
 
-page.onResourceError = function(err) {
-    // system.stderr.writeLine('= onResourceError()');
-    // system.stderr.writeLine('  - unable to load url: "' + err.url + '"');
-    // system.stderr.writeLine('  - error code: ' + err.errorCode + ', description: ' + err.errorString );
-};
+        if (/(t=pageview)/i.test(req.url) && req.stage === 'end') {
 
-page.onResourceReceived = function(res) {
-    // console.log('Response (#' + res.id + ', stage "' + res.stage + '"): ' + JSON.stringify(res));
-};
+            collect.pass = true;
+            collect.request.push(req.url);
+            collect.load = Date.now() - t;
+            collect.result = 'pageview already sent';
 
-page.onError = function(msg, trace) {
-
-    // var msgStack = ['ERROR: ' + msg];
-
-    // if (trace && trace.length) {
-    //   msgStack.push('TRACE:');
-    //   trace.forEach(function(t) {
-    //     msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function +'")' : ''));
-    //   });
-    // }
-
-    // console.error(msgStack.join('\n'));
+            report.collect(collect);
+        }
+    }
 };
 
 page.onLoadStarted = function() {
@@ -109,28 +91,15 @@ function handle_page(data) {
 
     //explore website
     page.open(pageUrl, function(status) {
-        if (status === "success") {
-            collect.load = Date.now() - t;
-            report.collect(collect);
-        } else {
+        if (status !== "success") {
             console.log('Fail to load the ' + pageUrl);
             report.collect(collect);
         }
-
-        page.stop();
-
-        //important!!  must wait a tiny time.
-        setTimeout(next_page, 100);
     });
 }
 
 function next_page() {
-    var data = scripts.pageview.page.shift();
-
-    if (typeof data !== 'object') {
-        phantom.exit(0);
-        report.create();
-    }
+    var data = scriptPageAry.shift();
 
     //reset some variables
     t = Date.now();
@@ -144,5 +113,15 @@ function next_page() {
 console.log('=== Google Analytics Monitoring ===');
 console.log('=== gaId ' + gaId + ' ===');
 
-//init
-next_page();
+var interval = setInterval(function() {
+
+    if (scriptPageAry.length === 0) {
+        clearInterval(interval);
+        report.create();
+        phantom.exit(0);
+        return false;
+    }
+
+    next_page();
+
+}, everyAryTime);
