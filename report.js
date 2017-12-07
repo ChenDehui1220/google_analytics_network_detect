@@ -53,7 +53,7 @@ report.prototype.collect = function(obj) {
 report.prototype.create = function() {
     var d = new Date();
     var n = d.toLocaleString();
-    fs.write('./report/index.html', this.container + '<h4>Tracking ID : ' + this.gaid + '<br>Updated by ' + n + '</h4>' + this.contents + this.containerEnd, 'w');
+    fs.write('./report/index.html', this.container + '<h4>Updated by ' + n + '</h4>' + this.contents + this.containerEnd, 'w');
     if (fs.isFile('report/style.css')) { 
         fs.remove('report/style.css'); 
     }

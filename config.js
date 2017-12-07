@@ -46,7 +46,7 @@ var config = {
             mobile: {width: 320, height: 568}
         },
         report: {
-            title: 'Google Analytics Network Test Results'
+            title: 'Tracking Code Network Test Results'
         }
     }
 
